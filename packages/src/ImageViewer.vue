@@ -216,12 +216,51 @@ function onKeyDown(e: KeyboardEvent) {
   }
 }
 
+let initialDistance = 0
+let initialScale = 1
+
+function getDistance(touches: TouchList) {
+  const [touch1, touch2] = [touches[0], touches[1]]
+  const dx = touch2.clientX - touch1.clientX
+  const dy = touch2.clientY - touch1.clientY
+  return Math.sqrt(dx * dx + dy * dy)
+}
+
+function onTouchStart(e: TouchEvent) {
+  if (e.touches.length === 2) {
+    initialDistance = getDistance(e.touches)
+    initialScale = scale.value
+  }
+}
+
+function onTouchMove(e: TouchEvent) {
+  if (e.touches.length === 2) {
+    e.preventDefault()
+    const newDistance = getDistance(e.touches)
+    const scaleChange = newDistance / initialDistance
+    scale.value = Math.min(Math.max(0.5, initialScale * scaleChange), 3)
+  }
+}
+
+function onTouchEnd(e: TouchEvent) {
+  if (e.touches.length < 2) {
+    initialDistance = 0
+  }
+}
+
+
 onMounted(() => {
   window.addEventListener('keydown', onKeyDown)
+  window.addEventListener('touchstart', onTouchStart, { passive: false })
+  window.addEventListener('touchmove', onTouchMove, { passive: false })
+  window.addEventListener('touchend', onTouchEnd)
 })
 
 onUnmounted(() => {
   window.removeEventListener('keydown', onKeyDown)
+  window.removeEventListener('touchstart', onTouchStart)
+  window.removeEventListener('touchmove', onTouchMove)
+  window.removeEventListener('touchend', onTouchEnd)
 })
 </script>
 

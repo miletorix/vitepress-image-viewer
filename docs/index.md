@@ -59,13 +59,13 @@ export default {
 **Input:**
 
 ```html [example.md]
-<img src="/demo-3.jpg" alt="Nature, landscape, portrait display." />
+<img src="/demo-3.jpg" alt="Nature, Landscape, Portrait display." />
 ```
 
 **Output:**
 
 <p align="center">
-  <img src="/demo-3.jpg" alt="Nature, landscape, portrait display." width="400">
+  <img src="/demo-3.jpg" alt="Nature, Landscape, Portrait display." width="400">
 </p>
 
 ### Image using the Image Group plugin
