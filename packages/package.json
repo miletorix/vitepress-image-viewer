@@ -1,6 +1,6 @@
 {
   "name": "@miletorix/vitepress-image-viewer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "repository": {
     "type": "git",
@@ -31,17 +31,17 @@
     "vue": "^3.0.0"
   },
   "keywords": [
-  "vitepress",
-  "vitepress plugin",
-  "vitepress image viewer",
-  "vue image viewer",
-  "image zoom",
-  "image lightbox",
-  "image overlay",
-  "vue 3",
-  "vitepress component",
-  "image preview"
-],
+    "vitepress",
+    "vitepress plugin",
+    "vitepress image viewer",
+    "vue image viewer",
+    "image zoom",
+    "image lightbox",
+    "image overlay",
+    "vue 3",
+    "vitepress component",
+    "image preview"
+  ],
   "author": "miletorix",
   "license": "MIT",
   "devDependencies": {
