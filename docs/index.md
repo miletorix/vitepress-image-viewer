@@ -47,12 +47,12 @@ export default {
 **Input:**
 
 ```md [example.md]
-![Rolling hills, Moravia, Czech Republic.](/demo-2.jpg)
+![Rolling hills, Moravia, Czech Republic](/demo-2.jpg)
 ```
 
 **Output:**
 
-![Rolling hills, Moravia, Czech Republic.](/demo-2.jpg)
+![Rolling hills, Moravia, Czech Republic](/demo-2.jpg)
 
 ### HTML Image
 
