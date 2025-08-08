@@ -9,8 +9,10 @@ import '@miletorix/vitepress-image-group/style.css'
 import BackToTopButton from '@miletorix/vitepress-back-to-top-button'
 import '@miletorix/vitepress-back-to-top-button/style.css'
 
-import ImageViewerP from '@miletorix/vitepress-image-viewer'
-import '@miletorix/vitepress-image-viewer/style.css'
+// import ImageViewerP from '@miletorix/vitepress-image-viewer'
+// import '@miletorix/vitepress-image-viewer/style.css'
+
+import ImageViewerP from '../../../packages/src/index'
 
 import { Card, CardsGroup } from '@miletorix/vitepress-enhanced-site-links'
 import '@miletorix/vitepress-enhanced-site-links/style.css'
