@@ -13,30 +13,15 @@
           </div>
 
           <div class="iv-buttons" role="toolbar" aria-label="Image viewer controls">
-            <button
-              @click="zoomOut"
-              :disabled="!canZoomOut"
-              aria-label="Zoom out"
-              title="Zoom out"
-            >
+            <button @click="zoomOut" :disabled="!canZoomOut" aria-label="Zoom out" title="Zoom out">
               <svg class="iv-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m21 21l-4.343-4.343m0 0A8 8 0 1 0 5.343 5.343a8 8 0 0 0 11.314 11.314M8 11h6"/></svg>
             </button>
 
-            <button
-              @click="zoomIn"
-              :disabled="!canZoomIn"
-              aria-label="Zoom in"
-              title="Zoom in"
-            >
+            <button @click="zoomIn" :disabled="!canZoomIn" aria-label="Zoom in" title="Zoom in">
               <svg class="iv-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m21 21l-4.343-4.343m0 0A8 8 0 1 0 5.343 5.343a8 8 0 0 0 11.314 11.314M11 8v6m-3-3h6"/></svg>
             </button>
 
-            <button
-              @click="resetTransform"
-              :disabled="!canReset"
-              aria-label="Reset"
-              title="Reset"
-            >
+            <button @click="resetTransform" :disabled="!canReset" aria-label="Reset" title="Reset">
               <svg class="iv-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><path fill="currentColor" d="M813.176 180.706a60.235 60.235 0 0 1 60.236 60.235v481.883a60.235 60.235 0 0 1-60.236 60.235H210.824a60.235 60.235 0 0 1-60.236-60.235V240.94a60.235 60.235 0 0 1 60.236-60.235h602.352zm0-60.235H210.824A120.47 120.47 0 0 0 90.353 240.94v481.883a120.47 120.47 0 0 0 120.47 120.47h602.353a120.47 120.47 0 0 0 120.471-120.47V240.94a120.47 120.47 0 0 0-120.47-120.47zm-120.47 180.705a30.12 30.12 0 0 0-30.118 30.118v301.177a30.118 30.118 0 0 0 60.236 0V331.294a30.12 30.12 0 0 0-30.118-30.118m-361.412 0a30.12 30.12 0 0 0-30.118 30.118v301.177a30.118 30.118 0 1 0 60.236 0V331.294a30.12 30.12 0 0 0-30.118-30.118M512 361.412a30.12 30.12 0 0 0-30.118 30.117v30.118a30.118 30.118 0 0 0 60.236 0V391.53A30.12 30.12 0 0 0 512 361.412M512 512a30.12 30.12 0 0 0-30.118 30.118v30.117a30.118 30.118 0 0 0 60.236 0v-30.117A30.12 30.12 0 0 0 512 512"/></svg>
             </button>
 
@@ -55,25 +40,28 @@
         </div>
 
         <div class="iv-side-nav">
-          <button class="iv-side iv-side-left" @click="prevImage" aria-label="Previous">
+          <button class="iv-side iv-side-left" @click="prevImage" :disabled="!hasPrev" aria-label="Previous">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M22 12H2m9-9l-9 9l9 9" /></svg>
           </button>
-          <button class="iv-side iv-side-right" @click="nextImage" aria-label="Next">
+          <button class="iv-side iv-side-right" @click="nextImage" :disabled="!hasNext" aria-label="Next">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M2 12h20m-9-9l9 9l-9 9" /></svg>
           </button>
         </div>
 
-        <img
-          v-if="src"
-          ref="animatedImage"
-          :src="src"
-          v-bind="alt ? { alt } : {}"
-          class="iv-image"
-          :style="imageStyle"
-          @mousedown="startDrag"
-          @touchstart="startDrag"
-          draggable="false"
-        />
+        <transition :name="imageTransition" mode="out-in">
+          <div v-if="src" :key="src + '-' + selectedIndex" class="iv-image-wrap">
+            <img
+              ref="animatedImage"
+              :src="src"
+              v-bind="alt ? { alt } : {}"
+              class="iv-image"
+              :style="imageStyle"
+              @mousedown="startDrag"
+              @touchstart="startDrag"
+              draggable="false"
+            />
+          </div>
+        </transition>
 
         <div v-if="!thumbnailsVisible && alt" class="iv-caption" role="note">{{ alt }}</div>
 
@@ -119,7 +107,6 @@ const canZoomOut = computed(() => scale.value > minScale + 1e-9)
 const canReset = computed(() => Math.abs(scale.value - 1) > 1e-6 || position.x !== 0 || position.y !== 0)
 
 const animatedImage = ref<HTMLImageElement | null>(null)
-let startRect: DOMRect | null = null
 
 const thumbnailsVisible = ref(false)
 const pageImages = ref<Array<{ src: string; alt: string }>>([])
@@ -127,7 +114,11 @@ const selectedIndex = ref(-1)
 const isMobile = ref(window.innerWidth < 768)
 let thumbOffset = ref(0) as any
 
-function collectPageImages() {
+let lastScopeRoot: Element | null = null
+
+const imageTransition = ref('iv-fade')
+
+function collectPageImages(root?: Element | null) {
   const selectorsToExclude = [
     'nav',
     'header',
@@ -140,9 +131,12 @@ function collectPageImages() {
     '.vp-navbar'
   ]
 
-  const imgs = Array.from(document.querySelectorAll<HTMLImageElement>('img:not(.no-viewer)'))
+  const defaultRoot = document.querySelector('main, article, .content, .vp-doc, .theme-doc, #main')
+  const scope: Element | Document = root ?? defaultRoot ?? document
 
-  const filtered = imgs.filter(img => {
+  const nodeList = Array.from(scope.querySelectorAll<HTMLImageElement>('img:not(.no-viewer)'))
+
+  const filtered = nodeList.filter(img => {
     for (const sel of selectorsToExclude) {
       if (img.closest(sel)) return false
     }
@@ -162,11 +156,17 @@ function collectPageImages() {
       list.push({ src: s, alt: a })
     }
   })
+
   pageImages.value = list
 }
 
 async function open(imageSrc: string, imageAlt = '', originEl?: HTMLImageElement) {
-  collectPageImages()
+  const rootCandidate = originEl?.closest('main, article, .content, .vp-doc, .theme-doc, #main') ?? document.querySelector('main, article, .content, .vp-doc, .theme-doc, #main') ?? null
+  lastScopeRoot = rootCandidate
+
+  collectPageImages(lastScopeRoot ?? undefined)
+
+  imageTransition.value = 'iv-fade'
 
   const normalized = (imageSrc || '').split('#')[0]
   const originAlt = originEl?.getAttribute('alt') ?? imageAlt ?? ''
@@ -189,10 +189,25 @@ async function open(imageSrc: string, imageAlt = '', originEl?: HTMLImageElement
   await nextTick()
 }
 
+defineExpose({ open, visible })
+
+const OVERLAY_FADE_MS = 300
+
 function close() {
   visible.value = false
   thumbnailsVisible.value = false
-  
+  imageTransition.value = 'iv-fade'
+
+  setTimeout(() => {
+    src.value = ''
+    alt.value = ''
+    selectedIndex.value = -1
+    pageImages.value = []
+    lastScopeRoot = null
+    scale.value = 1
+    position.x = 0
+    position.y = 0
+  }, OVERLAY_FADE_MS + 20)
 }
 
 function tryClose() {
@@ -217,10 +232,7 @@ function startDrag(e: MouseEvent | TouchEvent) {
   dragging.value = true
   dragged.value = false
   const point = 'touches' in e ? e.touches[0] : e
-  start.value = {
-    x: point.clientX - position.x,
-    y: point.clientY - position.y,
-  }
+  start.value = { x: point.clientX - position.x, y: point.clientY - position.y }
   window.addEventListener('mousemove', onDrag)
   window.addEventListener('mouseup', stopDrag)
   window.addEventListener('touchmove', onDrag, { passive: false })
@@ -243,29 +255,41 @@ function stopDrag() {
 }
 
 function toggleThumbs() {
-  collectPageImages()
+  collectPageImages(lastScopeRoot ?? undefined)
   thumbnailsVisible.value = !thumbnailsVisible.value
 }
 
 function selectByIndex(i: number) {
   if (i < 0 || i >= pageImages.value.length) return
+
+  if (selectedIndex.value === -1) {
+    imageTransition.value = 'iv-fade'
+  } else if (i > selectedIndex.value) {
+    imageTransition.value = 'iv-slide-left'
+  } else if (i < selectedIndex.value) {
+    imageTransition.value = 'iv-slide-right'
+  } else {
+    imageTransition.value = 'iv-fade'
+  }
+
   selectedIndex.value = i
   src.value = pageImages.value[i].src
   alt.value = pageImages.value[i].alt || ''
   resetTransform()
 }
 
+const hasPrev = computed(() => selectedIndex.value > 0)
+const hasNext = computed(() => selectedIndex.value >= 0 && selectedIndex.value < pageImages.value.length - 1)
+
 function prevImage() {
   if (!pageImages.value.length) return
-  const idx = selectedIndex.value >= 0 ? selectedIndex.value : 0
-  const next = (idx - 1 + pageImages.value.length) % pageImages.value.length
-  selectByIndex(next)
+  if (!hasPrev.value) return
+  selectByIndex(selectedIndex.value - 1)
 }
 function nextImage() {
   if (!pageImages.value.length) return
-  const idx = selectedIndex.value >= 0 ? selectedIndex.value : 0
-  const next = (idx + 1) % pageImages.value.length
-  selectByIndex(next)
+  if (!hasNext.value) return
+  selectByIndex(selectedIndex.value + 1)
 }
 
 function onKeyDown(e: KeyboardEvent) {
@@ -275,7 +299,6 @@ function onKeyDown(e: KeyboardEvent) {
   else if (e.key === 'ArrowRight') nextImage()
 }
 
-/* pinch handlers (kept) */
 let initialDistance = 0
 let initialScale = 1
 function getDistance(touches: TouchList) {
@@ -308,7 +331,7 @@ function downloadCurrent() {
 }
 
 const imageStyle = computed(() => ({
-  transform: `translate(-50%, -50%) translate(${position.x}px, ${position.y}px) scale(${scale.value})`,
+  transform: `translate(${position.x}px, ${position.y}px) scale(${scale.value})`,
   transition: dragging.value ? 'none' : 'transform 0.28s ease, opacity 0.22s ease',
   cursor: dragging.value ? 'grabbing' : 'grab',
   zIndex: 9999,
@@ -319,7 +342,7 @@ const displayIndex = computed(() => (selectedIndex.value >= 0 ? selectedIndex.va
 
 const visibleThumbs = computed(() => {
   const total = pageImages.value.length
-  if (!total) return []
+  if (!total || selectedIndex.value < 0) return []
   const count = isMobile.value ? 1 : 2
   const windowSize = count * 2 + 1
   let start = Math.max(0, selectedIndex.value - count)
@@ -344,8 +367,6 @@ onUnmounted(() => {
   window.removeEventListener('touchend', onTouchEnd)
   window.removeEventListener('resize', onResize)
 })
-
-defineExpose({ open, visible })
 </script>
 
 <style scoped>
@@ -359,9 +380,7 @@ defineExpose({ open, visible })
 }
 
 .iv-fade-enter-active,
-.iv-fade-leave-active {
-  transition: opacity 0.25s ease;
-}
+.iv-fade-leave-active { transition: opacity 0.25s ease; }
 .iv-fade-enter-from,
 .iv-fade-leave-to { opacity: 0; }
 
@@ -383,65 +402,34 @@ defineExpose({ open, visible })
   flex-wrap: nowrap;
 }
 .iv-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.iv-counter {
-  color: var(--vp-c-text-1);
-  font-size: 0.95rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 160px;
-}
+.iv-counter { color: var(--vp-c-text-1); font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
 
 .iv-buttons { display: flex; gap: 8px; align-items: center; flex: 0 0 auto; }
-.iv-buttons button {
-  background: transparent;
-  color: var(--vp-c-text-1);
-  border: none;
-  border-radius: 6px;
-  padding: 6px;
-  cursor: pointer;
-  font-size: 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 36px;
-  min-height: 36px;
-  transition: all 0.3s ease;
-}
+.iv-buttons button { background: transparent; color: var(--vp-c-text-1); border: none; border-radius: 6px; padding: 6px; cursor: pointer; font-size: 18px; display: inline-flex; align-items: center; justify-content: center; min-width: 36px; min-height: 36px; transition: all 0.3s ease; }
 .iv-buttons button:hover:not(:disabled) { background-color: var(--vp-c-brand-soft); color: var(--vp-c-brand-1) }
 .iv-buttons button:disabled { opacity: 0.4; cursor: not-allowed }
-
 .iv-icon { width: 26px; height: 26px; display: block; }
 
-/* Side nav */
 .iv-side-nav { position: fixed; inset: 0; z-index: 10000; pointer-events: none; }
-.iv-side {
-  position: absolute;
-  top: 50%;
-  opacity: 0.6;
-  transform: translateY(-50%);
-  width: 56px;
-  height: 56px;
-  border-radius: 999px;
-  border: none;
-  background: var(--vp-c-bg);
-  color: var(--vp-c-text-1);
-  font-size: 28px;
-  display: inline-grid;
-  place-items: center;
-  cursor: pointer;
-  pointer-events: auto;
-  transition: all 0.3s ease;
-}
+.iv-side { position: absolute; top: 50%; opacity: 0.6; transform: translateY(-50%); width: 56px; height: 56px; border-radius: 999px; border: none; background: var(--vp-c-bg); color: var(--vp-c-text-1); font-size: 28px; display: inline-grid; place-items: center; cursor: pointer; pointer-events: auto; transition: all 0.3s ease; }
 .iv-side:hover { color: var(--vp-c-brand-1); opacity: 1; }
 .iv-side-left { left: 12px }
 .iv-side-right { right: 12px }
+.iv-side:disabled { opacity: 0.35; cursor: not-allowed; }
 
-/* main image */
-.iv-image {
+.iv-image-wrap {
   position: fixed;
   top: 50%;
   left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iv-image {
+  position: relative;
   border-radius: 8px;
   user-select: none;
   -webkit-user-drag: none;
@@ -450,23 +438,11 @@ defineExpose({ open, visible })
   max-height: 80vh;
   pointer-events: auto;
   transform-origin: center center;
+  display: block;
 }
 
-/* caption */
-.iv-caption {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: var(--vp-c-text-1);
-  font-size: 0.95rem;
-  text-align: center;
-  user-select: none;
-  pointer-events: none;
-  z-index: 10001;
-}
+.iv-caption { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); color: var(--vp-c-text-1); font-size: 0.95rem; text-align: center; user-select: none; pointer-events: none; z-index: 10001 }
 
-/* thumbs */
 .iv-thumbs-bottom { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--vp-c-bg); z-index: 10000; box-shadow: 0 -4px 18px rgba(0,0,0,0.06); border-top: 1px solid var(--vp-c-divider); }
 .iv-thumbs-inner { display: flex; gap: 10px; padding: 12px; justify-content: center; overflow: auto; -webkit-overflow-scrolling: touch }
 .iv-thumb { width: 84px; height: 56px; flex: 0 0 auto; border-radius: 6px; overflow: hidden; display: inline-grid; place-items: center; cursor: pointer; transition: transform 0.18s ease }
@@ -474,11 +450,22 @@ defineExpose({ open, visible })
 .iv-thumb.active img { filter: brightness(1); opacity: 1; transition: all 0.3s ease; }
 .iv-thumb:focus { outline: 2px solid var(--vp-c-brand-1); outline-offset: 2px }
 
-/* slide up */
 .iv-slide-up-enter-active, .iv-slide-up-leave-active { transition: transform 0.28s ease, opacity 0.22s ease }
 .iv-slide-up-enter-from, .iv-slide-up-leave-to { transform: translateY(100%); opacity: 0 }
 
-/* responsive tweaks */
+.iv-slide-left-enter-active, .iv-slide-left-leave-active,
+.iv-slide-right-enter-active, .iv-slide-right-leave-active {
+  transition: transform 0.28s ease, opacity 0.22s ease;
+}
+.iv-slide-left-enter-from { transform: translate(calc(-50% + 100vw), -50%); opacity: 0; }
+.iv-slide-left-leave-to   { transform: translate(calc(-50% - 100vw), -50%); opacity: 0; }
+
+.iv-slide-right-enter-from { transform: translate(calc(-50% - 100vw), -50%); opacity: 0; }
+.iv-slide-right-leave-to   { transform: translate(calc(-50% + 100vw), -50%); opacity: 0; }
+
+.iv-fade-enter-active, .iv-fade-leave-active { transition: opacity 0.25s ease; }
+.iv-fade-enter-from, .iv-fade-leave-to { opacity: 0; }
+
 @media (max-width: 600px) {
   .iv-controls { height: 44px; padding: 0 12px; gap: 6px; }
   .iv-icon { width: 25px; height: 25px; }
