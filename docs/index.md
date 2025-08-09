@@ -83,8 +83,7 @@ export default {
   ]"
   type="manual"
   width="400px"
-  alt="Japanese Waterfall"
-  caption="Japanese Waterfall"
+  caption="Japanese Waterfall."
 />
 ```
 
@@ -96,6 +95,5 @@ export default {
   ]"
   type="manual"
   width="400px"
-  alt="Japanese Waterfall"
-  caption="Japanese Waterfall"
+  caption="Japanese Waterfall."
 />
