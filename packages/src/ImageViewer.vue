@@ -128,21 +128,28 @@ function collectPageImages(root?: Element | null) {
     '.vp-nav',
     '.vp-site-logo',
     '.theme-toggle',
-    '.vp-navbar'
+    '.vp-navbar',
+    '.link-card-logo'
   ]
 
   const defaultRoot = document.querySelector('main, article, .content, .vp-doc, .theme-doc, #main')
   const scope: Element | Document = root ?? defaultRoot ?? document
 
   const nodeList = Array.from(scope.querySelectorAll<HTMLImageElement>('img:not(.no-viewer)'))
-
+  const minSize = 60;
   const filtered = nodeList.filter(img => {
     for (const sel of selectorsToExclude) {
       if (img.closest(sel)) return false
     }
     if (!img.src) return false
     if (img.classList.contains('iv-thumb')) return false
-    if (img.width && img.width < 50) return false
+    
+
+    if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+      if (img.naturalWidth < minSize && img.naturalHeight < minSize) {
+        return false;
+      }
+    }
     return true
   })
 
