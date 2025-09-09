@@ -129,7 +129,8 @@ function collectPageImages(root?: Element | null) {
     '.vp-site-logo',
     '.theme-toggle',
     '.vp-navbar',
-    '.link-card-logo'
+    '.link-card-logo',
+    '.thumb'
   ]
 
   const defaultRoot = document.querySelector('main, article, .content, .vp-doc, .theme-doc, #main')
