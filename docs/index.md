@@ -40,6 +40,25 @@ export default {
 }
 ```
 
+### Advanced configuration
+```typescript
+// docs/.vitepress/theme/index.ts
+import type { Theme } from 'vitepress'
+import DefaultTheme from 'vitepress/theme'
+
+import ImageViewerP from '@miletorix/vitepress-image-viewer' //[!code ++]
+import '@miletorix/vitepress-image-viewer/style.css' //[!code ++]
+
+export default {
+  extends: DefaultTheme,
+  enhanceApp(ctx) { 
+    ImageViewerP(ctx.app, { //[!code ++]
+      transparentBg: true //[!code ++] default is false
+    }) //[!code ++]
+  }
+}
+```
+
 ## Examples
 
 ### Markdown Image
