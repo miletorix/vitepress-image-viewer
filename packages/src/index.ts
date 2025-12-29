@@ -1,5 +1,6 @@
 import { createApp, h, App, ref, ComponentPublicInstance, nextTick } from 'vue'
 import ImageViewer from './ImageViewer.vue'
+import type { ImageViewerOptions } from './types'
 
 interface ImageViewerExpose {
   open: (src: string, alt?: string, originEl?: HTMLImageElement) => void
@@ -25,14 +26,23 @@ function enhanceImages(viewerRef: ComponentPublicInstance<ImageViewerExpose> | n
   })
 }
 
-export default function ImageViewerP(app: App) {
+export default function ImageViewerP(
+  app: App,
+  options: ImageViewerOptions = {}
+) {
   if (typeof window === 'undefined') return
   if ((window as any).__vitepress_image_viewer_installed) return
   ;(window as any).__vitepress_image_viewer_installed = true
 
   const mountNode = document.createElement('div')
   document.body.appendChild(mountNode)
-
+  const rootStyle = document.documentElement.style
+  if (options.transparentBg) {
+    rootStyle.setProperty(
+      '--iv-overlay-bg',
+      'rgba(0, 0, 0, 0.75)'
+    )
+  }
   const viewerRef = ref<ComponentPublicInstance<ImageViewerExpose> | null>(null)
 
   const viewerApp = createApp({

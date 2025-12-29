@@ -1,6 +1,6 @@
 {
   "name": "@miletorix/vitepress-image-viewer",
-  "version": "1.1.4",
+  "version": "1.2.0",
   "type": "module",
   "repository": {
     "type": "git",
@@ -23,7 +23,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "vue-tsc --declaration --emitDeclarationOnly && vite build",
+    "build": "vue-tsc -p tsconfig.json && vite build && copy src\\index.d.ts dist\\index.d.ts",
     "clean": "rimraf dist node_modules .vite .turbo",
     "prepublishOnly": "npm run build"
   },

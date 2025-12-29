@@ -21,7 +21,9 @@ export default {
   extends: DefaultTheme,
   enhanceApp(ctx) {
     BackToTopButton(ctx.app) 
-    ImageViewerP(ctx.app)
+    ImageViewerP(ctx.app, {
+      transparentBg: true
+    })
     ctx.app.component('ImageGroup', ImageGroup)
     ctx.app.component('Card', Card)
     ctx.app.component('CardsGroup', CardsGroup)

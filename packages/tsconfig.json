@@ -1,14 +1,16 @@
 {
   "compilerOptions": {
-    "types": ["vite/client"],
     "target": "ESNext",
     "module": "ESNext",
-    "declaration": true,
-    "outDir": "dist",
     "moduleResolution": "Node",
-    "esModuleInterop": true,
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+
+    "declaration": true,
+    "declarationDir": "dist",
+    "rootDir": "src",
+
+    "types": ["vite/client"]
   },
-  "include": ["src"]
+  "include": ["src/**/*.ts", "src/**/*.d.ts"]
 }

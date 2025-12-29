@@ -381,7 +381,7 @@ onUnmounted(() => {
 .iv-overlay {
   position: fixed;
   inset: 0;
-  background: var(--vp-code-block-bg);
+  background: var(--iv-overlay-bg, var(--vp-code-block-bg));
   z-index: 9998;
   user-select: none;
   transition: opacity 0.25s ease;
