@@ -10,10 +10,10 @@
     "vitepress": "^1.6.3"
   },
   "dependencies": {
-    "@miletorix/vitepress-back-to-top-button": "^0.2.3",
-    "@miletorix/vitepress-enhanced-site-links": "^1.0.2",
-    "@miletorix/vitepress-image-group": "^1.1.3",
-    "@miletorix/vitepress-image-viewer": "^1.2.0",
+    "@miletorix/vitepress-back-to-top-button": "^1.0.3",
+    "@miletorix/vitepress-enhanced-site-links": "^1.0.6",
+    "@miletorix/vitepress-image-group": "^1.1.5",
+    "@miletorix/vitepress-image-viewer": "^1.3.0",
     "markdown-it": "^14.1.0",
     "vitepress-plugin-group-icons": "^1.6.1"
   }

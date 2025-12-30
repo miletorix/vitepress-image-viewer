@@ -51,7 +51,7 @@ export default {
   extends: DefaultTheme,
   enhanceApp(ctx) { 
     ImageViewerP(ctx.app, { //[!code ++]
-      transparentBg: true //[!code ++] default is false
+      transparentBg: false //[!code ++] default is true
     }) //[!code ++]
   }
 }
@@ -59,4 +59,5 @@ export default {
 
 ## Preview
 
-![preview](/assets/preview.gif)
+![preview](/assets/preview-2.png)
+![preview](/assets/preview-1.png)

@@ -48,7 +48,7 @@ export default {
   extends: DefaultTheme,
   enhanceApp(ctx) { 
     ImageViewerP(ctx.app, { //[!code ++]
-      transparentBg: true //[!code ++] default is false
+      transparentBg: false //[!code ++] default is true
     }) //[!code ++]
   }
 }
@@ -56,4 +56,5 @@ export default {
 
 ## Preview
 
-![preview](https://github.com/miletorix/vitepress-image-viewer/raw/main/assets/preview.gif)
+![preview](https://github.com/miletorix/vitepress-image-viewer/raw/main/assets/preview-2.png)
+![preview](https://github.com/miletorix/vitepress-image-viewer/raw/main/assets/preview-1.png)

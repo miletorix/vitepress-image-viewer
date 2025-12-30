@@ -37,12 +37,14 @@ export default function ImageViewerP(
   const mountNode = document.createElement('div')
   document.body.appendChild(mountNode)
   const rootStyle = document.documentElement.style
-  if (options.transparentBg) {
-    rootStyle.setProperty(
-      '--iv-overlay-bg',
-      'rgba(0, 0, 0, 0.75)'
-    )
-  }
+  const useTransparentBg = options.transparentBg !== false
+
+rootStyle.setProperty(
+  '--iv-overlay-bg',
+  useTransparentBg
+    ? 'rgba(0, 0, 0, 0.75)'
+    : 'var(--vp-code-block-bg)'
+)
   const viewerRef = ref<ComponentPublicInstance<ImageViewerExpose> | null>(null)
 
   const viewerApp = createApp({
@@ -56,14 +58,11 @@ export default function ImageViewerP(
     })
   }
 
-  // Инициализация при первой загрузке
   runEnhance()
 
-  // Типизация import.meta.env для Vite
   const isDev = typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV
 
   if (isDev) {
-    // В dev-режиме используем useRouter, если доступен
     import('vitepress').then(mod => {
       const router = (mod as any).useRouter?.()
       router?.afterEach?.(() => {
@@ -73,7 +72,6 @@ export default function ImageViewerP(
       setTimeout(runEnhance, 100)
     })
   } else {
-    // В продакшене наблюдаем за #app
     const observer = new MutationObserver(() => {
       runEnhance()
     })

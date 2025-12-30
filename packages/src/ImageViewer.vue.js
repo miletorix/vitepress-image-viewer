@@ -12,14 +12,19 @@ const start = ref({ x: 0, y: 0 });
 const lastOpenTime = ref(0);
 const minScale = 0.5;
 const maxScale = 3;
-const canZoomIn = computed(() => scale.value < maxScale - 1e-9);
-const canZoomOut = computed(() => scale.value > minScale + 1e-9);
-const canReset = computed(() => Math.abs(scale.value - 1) > 1e-6 || position.x !== 0 || position.y !== 0);
+const canZoomIn = computed(() => scale.value < maxScale - EPS);
+const canZoomOut = computed(() => scale.value > minScale + EPS);
+const canReset = computed(() => {
+    return (Math.abs(scale.value - 1) > EPS ||
+        Math.abs(position.x) > EPS ||
+        Math.abs(position.y) > EPS);
+});
 const animatedImage = ref(null);
-const thumbnailsVisible = ref(false);
+const isMobile = ref(window.innerWidth < 768);
+const thumbnailsVisible = ref(!isMobile.value);
 const pageImages = ref([]);
 const selectedIndex = ref(-1);
-const isMobile = ref(window.innerWidth < 768);
+const EPS = 0.001;
 let thumbOffset = ref(0);
 let lastScopeRoot = null;
 const imageTransition = ref('iv-fade');
@@ -96,7 +101,8 @@ defineExpose(__VLS_exposed);
 const OVERLAY_FADE_MS = 300;
 function close() {
     visible.value = false;
-    thumbnailsVisible.value = false;
+    lastOpenTime.value = Date.now();
+    thumbnailsVisible.value = !isMobile.value;
     imageTransition.value = 'iv-fade';
     setTimeout(() => {
         src.value = '';
@@ -120,11 +126,20 @@ function resetTransform() {
     position.y = 0;
     dragged.value = false;
 }
-function zoomIn() { scale.value = Math.min(scale.value + 0.1, maxScale); }
-function zoomOut() { scale.value = Math.max(scale.value - 0.1, minScale); }
+function zoomIn() {
+    if (!canZoomIn.value)
+        return;
+    scale.value = Math.min(scale.value + 0.1, maxScale);
+}
+function zoomOut() {
+    if (!canZoomOut.value)
+        return;
+    scale.value = Math.max(scale.value - 0.1, minScale);
+}
 function onWheel(e) {
     const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    scale.value = Math.min(Math.max(minScale, scale.value + delta), maxScale);
+    const next = scale.value + delta;
+    scale.value = Math.min(maxScale, Math.max(minScale, next));
 }
 function startDrag(e) {
     dragging.value = true;
@@ -221,7 +236,7 @@ function onTouchMove(e) {
         e.preventDefault();
         const newDistance = getDistance(e.touches);
         const scaleChange = newDistance / initialDistance;
-        scale.value = Math.min(Math.max(minScale, initialScale * scaleChange), maxScale);
+        scale.value = Math.min(maxScale, Math.max(minScale, initialScale * scaleChange));
     }
 }
 function onTouchEnd(e) { if (e.touches.length < 2)
@@ -244,15 +259,31 @@ const visibleThumbs = computed(() => {
     const total = pageImages.value.length;
     if (!total || selectedIndex.value < 0)
         return [];
-    const count = isMobile.value ? 1 : 2;
+    // 🖥 Desktop — показываем ВСЕ миниатюры
+    if (!isMobile.value) {
+        thumbOffset.value = 0;
+        return pageImages.value;
+    }
+    // 📱 Mobile — компактное окно вокруг активной
+    const count = 1;
     const windowSize = count * 2 + 1;
     let start = Math.max(0, selectedIndex.value - count);
-    if (start + windowSize > total)
+    if (start + windowSize > total) {
         start = Math.max(0, total - windowSize);
+    }
     thumbOffset.value = start;
-    return pageImages.value.slice(start, Math.min(total, start + windowSize));
+    return pageImages.value.slice(start, start + windowSize);
 });
-function onResize() { isMobile.value = window.innerWidth < 768; }
+function onResize() {
+    const mobile = window.innerWidth < 768;
+    if (isMobile.value !== mobile) {
+        isMobile.value = mobile;
+        // при переключении режима:
+        // десктоп → показать миниатюры
+        // мобила → скрыть миниатюры
+        thumbnailsVisible.value = !mobile;
+    }
+}
 onMounted(() => {
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('touchstart', onTouchStart, { passive: false });
@@ -274,6 +305,12 @@ const __VLS_ctx = {
 let __VLS_components;
 let __VLS_intrinsics;
 let __VLS_directives;
+/** @type {__VLS_StyleScopedClasses['iv-left']} */ ;
+/** @type {__VLS_StyleScopedClasses['iv-buttons']} */ ;
+/** @type {__VLS_StyleScopedClasses['iv-buttons']} */ ;
+/** @type {__VLS_StyleScopedClasses['iv-buttons']} */ ;
+/** @type {__VLS_StyleScopedClasses['iv-buttons']} */ ;
+/** @type {__VLS_StyleScopedClasses['iv-buttons']} */ ;
 /** @type {__VLS_StyleScopedClasses['iv-buttons']} */ ;
 /** @type {__VLS_StyleScopedClasses['iv-buttons']} */ ;
 /** @type {__VLS_StyleScopedClasses['iv-buttons']} */ ;
@@ -281,17 +318,21 @@ let __VLS_directives;
 /** @type {__VLS_StyleScopedClasses['iv-side']} */ ;
 /** @type {__VLS_StyleScopedClasses['iv-thumb']} */ ;
 /** @type {__VLS_StyleScopedClasses['iv-thumb']} */ ;
+/** @type {__VLS_StyleScopedClasses['iv-thumb']} */ ;
+/** @type {__VLS_StyleScopedClasses['iv-thumb']} */ ;
+/** @type {__VLS_StyleScopedClasses['active']} */ ;
 /** @type {__VLS_StyleScopedClasses['iv-thumb']} */ ;
 /** @type {__VLS_StyleScopedClasses['iv-fade-enter-active']} */ ;
 /** @type {__VLS_StyleScopedClasses['iv-fade-leave-active']} */ ;
 /** @type {__VLS_StyleScopedClasses['iv-fade-enter-from']} */ ;
 /** @type {__VLS_StyleScopedClasses['iv-fade-leave-to']} */ ;
 /** @type {__VLS_StyleScopedClasses['iv-controls']} */ ;
-/** @type {__VLS_StyleScopedClasses['iv-icon']} */ ;
 /** @type {__VLS_StyleScopedClasses['iv-counter']} */ ;
 /** @type {__VLS_StyleScopedClasses['iv-buttons']} */ ;
 /** @type {__VLS_StyleScopedClasses['iv-side']} */ ;
 /** @type {__VLS_StyleScopedClasses['iv-thumb']} */ ;
+/** @type {__VLS_StyleScopedClasses['iv-caption']} */ ;
+/** @type {__VLS_StyleScopedClasses['iv-caption']} */ ;
 let __VLS_0;
 /** @ts-ignore @type {typeof __VLS_components.Teleport | typeof __VLS_components.Teleport} */
 Teleport;
@@ -401,7 +442,7 @@ __VLS_asFunctionalElement1(__VLS_intrinsics.path)({
 __VLS_asFunctionalElement1(__VLS_intrinsics.button, __VLS_intrinsics.button)({
     ...{ onClick: (__VLS_ctx.toggleThumbs) },
     'aria-label': "Toggle thumbnails",
-    title: "Toggle thumbnails",
+    title: (__VLS_ctx.thumbnailsVisible ? 'Hide thumbnails' : 'Show thumbnails'),
 });
 __VLS_asFunctionalElement1(__VLS_intrinsics.svg, __VLS_intrinsics.svg)({
     ...{ class: "iv-icon" },
@@ -525,7 +566,7 @@ if (__VLS_ctx.src) {
     /** @type {__VLS_StyleScopedClasses['iv-image']} */ ;
 }
 // @ts-ignore
-[tryClose, onWheel, visible, displayIndex, totalImages, zoomOut, canZoomOut, zoomIn, canZoomIn, resetTransform, canReset, toggleThumbs, downloadCurrent, close, prevImage, hasPrev, nextImage, hasNext, imageTransition, src, src, src, selectedIndex, startDrag, startDrag, alt, alt, imageStyle,];
+[tryClose, onWheel, visible, displayIndex, totalImages, zoomOut, canZoomOut, zoomIn, canZoomIn, resetTransform, canReset, toggleThumbs, thumbnailsVisible, downloadCurrent, close, prevImage, hasPrev, nextImage, hasNext, imageTransition, src, src, src, selectedIndex, startDrag, startDrag, alt, alt, imageStyle,];
 var __VLS_15;
 if (!__VLS_ctx.thumbnailsVisible && __VLS_ctx.alt) {
     __VLS_asFunctionalElement1(__VLS_intrinsics.div, __VLS_intrinsics.div)({
@@ -564,7 +605,7 @@ if (__VLS_ctx.thumbnailsVisible) {
                         return;
                     __VLS_ctx.selectByIndex(__VLS_ctx.thumbOffset + idx);
                     // @ts-ignore
-                    [alt, alt, thumbnailsVisible, thumbnailsVisible, visibleThumbs, selectByIndex, thumbOffset,];
+                    [thumbnailsVisible, thumbnailsVisible, alt, alt, visibleThumbs, selectByIndex, thumbOffset,];
                 } },
             key: (t.src + '_' + (__VLS_ctx.thumbOffset + idx)),
             ...{ class: "iv-thumb" },
