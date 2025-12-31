@@ -4,4 +4,10 @@ export interface ImageViewerOptions {
    * @default true
    */
   transparentBg?: boolean
+
+  /**
+   * Automatically show thumbnails on desktop
+   * @default true
+   */
+  autoShowThumbnails?: boolean
 }

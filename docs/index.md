@@ -41,6 +41,11 @@ export default {
 ```
 
 ### Advanced configuration
+
+- ```transparentBg?: boolean``` - Use transparent dark overlay instead of solid background. Default is true.
+
+- ```autoShowThumbnails?: boolean``` - Automatically show thumbnails on desktop. Default is true.
+
 ```typescript [docs/.vitepress/theme/index.ts]
 import type { Theme } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
@@ -52,7 +57,8 @@ export default {
   extends: DefaultTheme,
   enhanceApp(ctx) { 
     ImageViewerP(ctx.app, { //[!code ++]
-      transparentBg: false //[!code ++] default is true
+      transparentBg: false, //[!code ++] default is true
+      autoShowThumbnails: false //[!code ++] default is true
     }) //[!code ++]
   }
 }

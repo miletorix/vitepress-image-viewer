@@ -1,6 +1,8 @@
 /// <reference types="C:/Users/user1/Desktop/vitepress-image-viewer/packages/node_modules/@vue/language-core/types/template-helpers.d.ts" />
 /// <reference types="C:/Users/user1/Desktop/vitepress-image-viewer/packages/node_modules/@vue/language-core/types/props-fallback.d.ts" />
 import { ref, reactive, computed, onMounted, onUnmounted, nextTick } from 'vue';
+const props = defineProps();
+const autoShowThumbs = computed(() => props.autoShowThumbnails !== false);
 const visible = ref(false);
 const src = ref('');
 const alt = ref('');
@@ -21,7 +23,7 @@ const canReset = computed(() => {
 });
 const animatedImage = ref(null);
 const isMobile = ref(window.innerWidth < 768);
-const thumbnailsVisible = ref(!isMobile.value);
+const thumbnailsVisible = ref(!isMobile.value && autoShowThumbs.value);
 const pageImages = ref([]);
 const selectedIndex = ref(-1);
 const EPS = 0.001;
@@ -74,6 +76,12 @@ function collectPageImages(root) {
     });
     pageImages.value = list;
 }
+function lockScroll() {
+    document.body.style.overflow = 'hidden';
+}
+function unlockScroll() {
+    document.body.style.overflow = '';
+}
 async function open(imageSrc, imageAlt = '', originEl) {
     const rootCandidate = originEl?.closest('main, article, .content, .vp-doc, .theme-doc, #main') ?? document.querySelector('main, article, .content, .vp-doc, .theme-doc, #main') ?? null;
     lastScopeRoot = rootCandidate;
@@ -93,16 +101,23 @@ async function open(imageSrc, imageAlt = '', originEl) {
     position.x = 0;
     position.y = 0;
     visible.value = true;
+    lockScroll();
     lastOpenTime.value = Date.now();
     await nextTick();
+    if (!isMobile.value) {
+        thumbnailsVisible.value =
+            autoShowThumbs.value && window.innerHeight > 800;
+    }
 }
 const __VLS_exposed = { open, visible };
 defineExpose(__VLS_exposed);
 const OVERLAY_FADE_MS = 300;
 function close() {
     visible.value = false;
+    unlockScroll();
     lastOpenTime.value = Date.now();
-    thumbnailsVisible.value = !isMobile.value;
+    thumbnailsVisible.value =
+        !isMobile.value && autoShowThumbs.value;
     imageTransition.value = 'iv-fade';
     setTimeout(() => {
         src.value = '';
@@ -247,11 +262,21 @@ function downloadCurrent() {
     link.download = alt.value || 'image';
     link.click();
 }
+const imageMaxHeight = computed(() => {
+    if (!thumbnailsVisible.value)
+        return '80vh';
+    // desktop
+    if (!isMobile.value)
+        return '68vh';
+    // mobile
+    return '70vh';
+});
 const imageStyle = computed(() => ({
     transform: `translate(${position.x}px, ${position.y}px) scale(${scale.value})`,
     transition: dragging.value ? 'none' : 'transform 0.28s ease, opacity 0.22s ease',
     cursor: dragging.value ? 'grabbing' : 'grab',
     zIndex: 9999,
+    maxHeight: imageMaxHeight.value
 }));
 const totalImages = computed(() => pageImages.value.length);
 const displayIndex = computed(() => (selectedIndex.value >= 0 ? selectedIndex.value + 1 : 0));
@@ -281,7 +306,8 @@ function onResize() {
         // при переключении режима:
         // десктоп → показать миниатюры
         // мобила → скрыть миниатюры
-        thumbnailsVisible.value = !mobile;
+        thumbnailsVisible.value =
+            !mobile && autoShowThumbs.value;
     }
 }
 onMounted(() => {
@@ -299,6 +325,8 @@ onUnmounted(() => {
     window.removeEventListener('resize', onResize);
 });
 const __VLS_ctx = {
+    ...{},
+    ...{},
     ...{},
     ...{},
 };
@@ -326,6 +354,11 @@ let __VLS_directives;
 /** @type {__VLS_StyleScopedClasses['iv-fade-leave-active']} */ ;
 /** @type {__VLS_StyleScopedClasses['iv-fade-enter-from']} */ ;
 /** @type {__VLS_StyleScopedClasses['iv-fade-leave-to']} */ ;
+/** @type {__VLS_StyleScopedClasses['iv-buttons']} */ ;
+/** @type {__VLS_StyleScopedClasses['iv-thumb']} */ ;
+/** @type {__VLS_StyleScopedClasses['iv-thumb']} */ ;
+/** @type {__VLS_StyleScopedClasses['active']} */ ;
+/** @type {__VLS_StyleScopedClasses['iv-thumbs-bottom']} */ ;
 /** @type {__VLS_StyleScopedClasses['iv-controls']} */ ;
 /** @type {__VLS_StyleScopedClasses['iv-counter']} */ ;
 /** @type {__VLS_StyleScopedClasses['iv-buttons']} */ ;
@@ -634,5 +667,6 @@ var __VLS_3;
 [];
 const __VLS_export = (await import('vue')).defineComponent({
     setup: () => (__VLS_exposed),
+    __typeProps: {},
 });
 export default {};

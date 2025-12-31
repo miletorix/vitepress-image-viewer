@@ -26,12 +26,16 @@ export default function ImageViewerP(app, options = {}) {
     document.body.appendChild(mountNode);
     const rootStyle = document.documentElement.style;
     const useTransparentBg = options.transparentBg !== false;
+    const autoShowThumbnails = options.autoShowThumbnails !== false;
     rootStyle.setProperty('--iv-overlay-bg', useTransparentBg
         ? 'rgba(0, 0, 0, 0.75)'
         : 'var(--vp-code-block-bg)');
     const viewerRef = ref(null);
     const viewerApp = createApp({
-        render: () => h(ImageViewer, { ref: viewerRef })
+        render: () => h(ImageViewer, {
+            ref: viewerRef,
+            autoShowThumbnails
+        })
     });
     viewerApp.mount(mountNode);
     const runEnhance = () => {

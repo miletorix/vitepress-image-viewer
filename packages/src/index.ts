@@ -38,6 +38,7 @@ export default function ImageViewerP(
   document.body.appendChild(mountNode)
   const rootStyle = document.documentElement.style
   const useTransparentBg = options.transparentBg !== false
+  const autoShowThumbnails = options.autoShowThumbnails !== false
 
 rootStyle.setProperty(
   '--iv-overlay-bg',
@@ -48,7 +49,11 @@ rootStyle.setProperty(
   const viewerRef = ref<ComponentPublicInstance<ImageViewerExpose> | null>(null)
 
   const viewerApp = createApp({
-    render: () => h(ImageViewer, { ref: viewerRef })
+    render: () =>
+      h(ImageViewer, {
+        ref: viewerRef,
+        autoShowThumbnails
+      })
   })
   viewerApp.mount(mountNode)
 

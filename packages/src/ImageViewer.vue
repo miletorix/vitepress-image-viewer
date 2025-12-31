@@ -90,6 +90,11 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, onUnmounted, nextTick } from 'vue'
 
+const props = defineProps<{
+  autoShowThumbnails?: boolean
+}>()
+
+const autoShowThumbs = computed(() => props.autoShowThumbnails !== false)
 const visible = ref(false)
 const src = ref('')
 const alt = ref('')
@@ -114,7 +119,9 @@ const canReset = computed(() => {
 
 const animatedImage = ref<HTMLImageElement | null>(null)
 const isMobile = ref(window.innerWidth < 768)
-const thumbnailsVisible = ref(!isMobile.value)
+const thumbnailsVisible = ref(
+  !isMobile.value && autoShowThumbs.value
+)
 const pageImages = ref<Array<{ src: string; alt: string }>>([])
 const selectedIndex = ref(-1)
 const EPS = 0.001
@@ -175,7 +182,12 @@ function collectPageImages(root?: Element | null) {
 
   pageImages.value = list
 }
-
+function lockScroll() {
+  document.body.style.overflow = 'hidden'
+}
+function unlockScroll() {
+  document.body.style.overflow = ''
+}
 async function open(imageSrc: string, imageAlt = '', originEl?: HTMLImageElement) {
   const rootCandidate = originEl?.closest('main, article, .content, .vp-doc, .theme-doc, #main') ?? document.querySelector('main, article, .content, .vp-doc, .theme-doc, #main') ?? null
   lastScopeRoot = rootCandidate
@@ -200,19 +212,29 @@ async function open(imageSrc: string, imageAlt = '', originEl?: HTMLImageElement
   position.x = 0
   position.y = 0
   visible.value = true
+  lockScroll()
   lastOpenTime.value = Date.now()
 
   await nextTick()
+
+  if (!isMobile.value) {
+    thumbnailsVisible.value =
+      autoShowThumbs.value && window.innerHeight > 800
+  }
 }
 
 defineExpose({ open, visible })
+
+
 
 const OVERLAY_FADE_MS = 300
 
 function close() {
   visible.value = false
+  unlockScroll()
   lastOpenTime.value = Date.now()
-  thumbnailsVisible.value = !isMobile.value
+  thumbnailsVisible.value =
+  !isMobile.value && autoShowThumbs.value
   imageTransition.value = 'iv-fade'
 
   setTimeout(() => {
@@ -356,12 +378,22 @@ function downloadCurrent() {
   link.download = alt.value || 'image'
   link.click()
 }
+const imageMaxHeight = computed(() => {
+  if (!thumbnailsVisible.value) return '80vh'
+
+  // desktop
+  if (!isMobile.value) return '68vh'
+
+  // mobile
+  return '70vh'
+})
 
 const imageStyle = computed(() => ({
   transform: `translate(${position.x}px, ${position.y}px) scale(${scale.value})`,
   transition: dragging.value ? 'none' : 'transform 0.28s ease, opacity 0.22s ease',
   cursor: dragging.value ? 'grabbing' : 'grab',
   zIndex: 9999,
+  maxHeight: imageMaxHeight.value
 }))
 
 const totalImages = computed(() => pageImages.value.length)
@@ -399,7 +431,8 @@ function onResize() {
     // при переключении режима:
     // десктоп → показать миниатюры
     // мобила → скрыть миниатюры
-    thumbnailsVisible.value = !mobile
+    thumbnailsVisible.value =
+      !mobile && autoShowThumbs.value
   }
 }
 
@@ -691,6 +724,25 @@ onUnmounted(() => {
   justify-content: center;
 }
 
+@media (min-width: 1600px) {
+  .iv-buttons {
+    backdrop-filter: blur(12px);
+  }
+}
+
+@media (max-height: 800px) {
+  .iv-thumb {
+    height: 56px;
+  }
+
+  .iv-thumb.active {
+    width: 84px;
+  }
+
+  .iv-thumbs-bottom {
+    padding: 10px 14px;
+  }
+}
 
 @media (max-width: 600px) {
   .iv-controls {
