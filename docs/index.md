@@ -8,7 +8,7 @@ sidebar: false
 
 # vitepress-image-viewer 
 
-VitePress image viewer with zoom, drag, fullscreen overlay, captions and download button. Automatically enhances all images on the page. Built with Vue 3. 
+VitePress image viewer with zoom, drag, fullscreen overlay, captions and download button. Automatically enhances all images on the page. Built with Vue 3. ✨ 
 
 ![npm](https://img.shields.io/npm/v/@miletorix/vitepress-image-viewer)  
 ![npm](https://img.shields.io/npm/dw/@miletorix/vitepress-image-viewer)  

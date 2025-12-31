@@ -19,6 +19,7 @@ import '@miletorix/vitepress-enhanced-site-links/style.css'
 
 export default {
   extends: DefaultTheme,
+  // @ts-ignore
   enhanceApp(ctx) {
     BackToTopButton(ctx.app) 
     ImageViewerP(ctx.app)

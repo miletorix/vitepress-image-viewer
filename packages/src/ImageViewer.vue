@@ -26,7 +26,7 @@
             </button>
 
             <button @click="toggleThumbs" aria-label="Toggle thumbnails" :title="thumbnailsVisible ? 'Hide thumbnails' : 'Show thumbnails'">
-              <svg class="iv-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M9.5 3a1.5 1.5 0 1 1-3 0a1.5 1.5 0 0 1 3 0M3 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3M9.5 8a1.5 1.5 0 1 1-3 0a1.5 1.5 0 0 1 3 0m5 0a1.5 1.5 0 1 1-3 0a1.5 1.5 0 0 1 3 0M13 4.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3M4.5 3a1.5 1.5 0 1 1-3 0a1.5 1.5 0 0 1 3 0M8 14.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3m6.5-1.5a1.5 1.5 0 1 1-3 0a1.5 1.5 0 0 1 3 0M3 14.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" clip-rule="evenodd" /></svg>
+              <svg class="iv-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path fill="currentColor" d="M8 30H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2m-4-6v4h4v-4zm14 6h-4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2m-4-6v4h4v-4zm14 6h-4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2m-4-6v4h4v-4zm4-4H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h24a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2M4 4v14h24V4z"/></svg>
             </button>
 
             <button @click="downloadCurrent" aria-label="Download" title="Download">
@@ -526,11 +526,28 @@ onUnmounted(() => {
 }
 
 .iv-side-nav { position: fixed; inset: 0; z-index: 10000; pointer-events: none; }
-.iv-side { position: absolute; top: 50%; opacity: 0.6; transform: translateY(-50%); width: 56px; height: 56px; border-radius: 999px; border: none; background: var(--vp-c-bg); color: var(--vp-c-text-1); font-size: 28px; display: inline-grid; place-items: center; cursor: pointer; pointer-events: auto; transition: all 0.3s ease; }
+.iv-side { 
+  position: absolute; 
+  top: 50%; 
+  /* opacity: 0.85;  */
+  opacity: 1;
+  transform: translateY(-50%); 
+  width: 56px; 
+  height: 56px; 
+  border-radius: 999px; 
+  border: none; 
+  background: rgba(30, 31, 34, 0.9); 
+  color: #dbdee1;
+  font-size: 28px; display: 
+  inline-grid; place-items: 
+  center; cursor: pointer; 
+  pointer-events: auto; 
+  transition: all 0.3s ease; 
+}
 .iv-side:hover { color: var(--vp-c-brand-1); opacity: 1; }
 .iv-side-left { left: 12px }
 .iv-side-right { right: 12px }
-.iv-side:disabled { opacity: 0.35; cursor: not-allowed; }
+.iv-side:disabled { opacity: 0.35; cursor: not-allowed; color: #dbdee1; }
 
 .iv-image-wrap {
   position: fixed;
